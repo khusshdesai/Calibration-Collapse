@@ -1,25 +1,52 @@
-# Calibration Collapse: Diagnosing and Correcting Synthetic-Induced Overconfidence
+<div align="center">
+  <h1>📉 Calibration Collapse</h1>
+  <p><b>Diagnosing and Correcting Synthetic-Induced Overconfidence in Transformer Classifiers</b></p>
+</div>
 
-Models trained on LLM-generated synthetic data suffer from systematic overconfidence, a phenomenon we term **Calibration Collapse**. This repository contains the code and experiments demonstrating this effect across DistilBERT and RoBERTa classifiers. 
+> **Disclaimer:** This repository, the code, and the accompanying synthetic datasets are intended strictly for **academic and research purposes**.
 
-It also includes the implementation of **Synthetic-Aware Temperature Scaling (SATS)**, a heuristic method that corrects this logit inflation without requiring human-labeled validation data.
+## 📖 Overview
+Large Language Models (LLMs) are increasingly used to generate synthetic training data to reduce annotation costs. However, this introduces a critical but underexplored hidden failure mechanism: classifiers trained on synthetic data become systematically overconfident, producing highly certain predictions that are often incorrect. 
 
-## Highlights
-- **Diagnosed the limits of synthetic training:** Proved that while mixed regimes (up to 75% synthetic data) can be calibrated, 100% synthetic training induces irreversible structural logit imbalances.
-- **SATS Heuristic:** A novel approach to dynamically predict optimal Temperature Scaling parameters directly from unscaled logit variance, achieving $\Delta T < 0.06$ prediction error.
-- **Reproducible Pipeline:** Complete code for data generation (LLaMA 3.2 / Gemma 2), model fine-tuning, and evaluating Expected Calibration Error (ECE).
+This repository provides the code, datasets, and experiments for diagnosing this phenomenon—which we term **Calibration Collapse**—and introduces **Synthetic-Aware Temperature Scaling (SATS)**, a heuristic method to correct it without requiring a human-labeled validation set.
 
-## Repository Structure
-- `src/`: Core Python modules for training, calibration (SATS), and experimentation.
-- `data/`: Sample synthetic datasets used for training and evaluation.
-- `results/`: Output CSVs, logs, and reliability diagrams.
-- `test.py`: Entry point for testing components.
+## 📊 The Phenomenon: Calibration Collapse
+As the proportion of synthetic data increases, models learn to inflate logit magnitudes rather than robust decision boundaries, largely due to the lack of long-tail linguistic diversity in LLM-generated text. This destroys probabilistic calibration.
 
-## Setup
-```bash
-pip install -r requirements.txt
-```
+### Reliability Diagrams (DistilBERT)
+*Ideal calibration follows the diagonal line. Predictions below the line indicate overconfidence.*
 
-## License
-MIT License. 
-*(Note: Synthetic datasets provided were generated using LLaMA 3.2 and Gemma 2, and their use is subject to the respective Meta and Google terms of service.)*
+| 0% Synthetic (Real Baseline) | 100% Synthetic (Uncalibrated) | 100% Synthetic (Post-Scaling) |
+|:---:|:---:|:---:|
+| <img src="results/figures/before_0pct.png" width="300" /> | <img src="results/figures/before_100pct.png" width="300" /> | <img src="results/figures/after_100pct.png" width="300" /> |
+| **ECE: 4.96%** | **ECE: 17.10%** | **ECE: 8.42%** |
+
+*Notice the massive spike in overconfidence at 100% synthetic training. While Temperature Scaling improves it, a residual error persists, proving that fully synthetic regimes inflict irreversible structural damage to the logit space.*
+
+## 🚀 Synthetic-Aware Temperature Scaling (SATS)
+We propose SATS to achieve validation-free calibration. By mathematically modeling the linear logit inflation caused by synthetic data variance reduction, SATS predicts the optimal Temperature Scaling parameter ($T$) directly from unscaled test-time logit statistics. 
+
+<div align="center">
+  <img src="results/figures/sats_scatter.png" width="450" />
+</div>
+
+## 📂 Repository Structure
+- `src/`: Core Python modules for training, calibration (`sats.py`), and experiment execution.
+- `data/`: Mixed real and synthetic (LLaMA 3.2 / Gemma 2) training samples.
+- `results/`: Output logs, CSV metrics, and generated reliability diagrams.
+- `test.py`: Entry point for executing the pipeline.
+
+## ⚙️ Setup and Usage
+1. Clone the repository and install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Run the main evaluation suite:
+   ```bash
+   python test.py
+   ```
+
+## 📜 License & Acknowledgements
+- The codebase is released under the **MIT License**.
+- Synthetic datasets were generated using LLaMA 3.2 and Gemma 2. Their usage is subject to the respective Meta and Google Acceptable Use Policies. 
+- *Intended for academic research purposes only.*
