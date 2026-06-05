@@ -1,0 +1,6 @@
+Archive_and_Personal/
+venv312/
+checkpoints/
+__pycache__/
+*.pyc
+.DS_Store
