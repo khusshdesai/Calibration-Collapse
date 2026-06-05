@@ -21,7 +21,17 @@ As the proportion of synthetic data increases, models learn to inflate logit mag
 | <img src="results/figures/before_0pct.png" width="300" /> | <img src="results/figures/before_100pct.png" width="300" /> | <img src="results/figures/after_100pct.png" width="300" /> |
 | **ECE: 4.96%** | **ECE: 17.10%** | **ECE: 8.42%** |
 
-*Notice the massive spike in overconfidence at 100% synthetic training. While Temperature Scaling improves it, a residual error persists, proving that fully synthetic regimes inflict irreversible structural damage to the logit space.*
+### Key Findings (DistilBERT)
+
+| Synthetic Ratio | Accuracy | Uncalibrated ECE | Global Temp ($T$) | Post-Scaling ECE |
+|:---:|:---:|:---:|:---:|:---:|
+| 0% (Real) | 91.9% | 4.96% | 1.43 | 2.04% |
+| 25% | 91.4% | 5.31% | 1.46 | 2.01% |
+| 50% | 90.7% | 6.00% | 1.49 | 2.08% |
+| 75% | 89.7% | 6.82% | 1.54 | **1.80%** |
+| 100% | 78.4% | **17.10%** | 1.86 | 8.42% |
+
+*Notice the massive spike in overconfidence at 100% synthetic training. While Temperature Scaling improves calibration beautifully in mixed regimes (achieving an excellent 1.80% ECE at a 75% synthetic mix), a residual 8.42% error persists at the 100% extreme. This proves that fully synthetic regimes inflict irreversible structural damage to the logit space.*
 
 ## 🚀 Synthetic-Aware Temperature Scaling (SATS)
 We propose SATS to achieve validation-free calibration. By mathematically modeling the linear logit inflation caused by synthetic data variance reduction, SATS predicts the optimal Temperature Scaling parameter ($T$) directly from unscaled test-time logit statistics. 
